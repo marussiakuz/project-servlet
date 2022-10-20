@@ -1,4 +1,8 @@
-package com.tictactoe;
+package com.tictactoe.servlet;
+
+import com.tictactoe.model.Field;
+import com.tictactoe.model.Level;
+import com.tictactoe.model.Sign;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,18 +15,20 @@ import java.io.IOException;
 import java.util.List;
 
 @WebServlet(name = "LogicServlet", value = "/logic")
-public class LogicServlet extends HttpServlet {
+public class LogicServlet extends HttpServlet implements LevelDeterminable {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession currentSession = req.getSession();
+
         Field field = extractField(currentSession);
+
         int index = getSelectedIndex(req);
 
         Sign currentSign = field.getField().get(index);
 
         if (Sign.EMPTY != currentSign) {
-            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/index.jsp");
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/jsp/index.jsp");
             dispatcher.forward(req, resp);
             return;
         }
@@ -32,7 +38,15 @@ public class LogicServlet extends HttpServlet {
             return;
         }
 
-        int emptyFieldIndex = field.getEmptyFieldIndex();
+        Level level = getLevel(currentSession);
+        Boolean isThoughtfulStep = null;
+        if (level == Level.MIDDLE) {
+            isThoughtfulStep = getThoughtfulStep(currentSession);
+            currentSession.setAttribute("thoughtful", !isThoughtfulStep);
+        }
+
+        int emptyFieldIndex = (level == Level.LOW || Boolean.FALSE.equals(isThoughtfulStep)) ?
+                field.getEmptyFieldIndex() : field.getTheBestFieldIndex();
 
         if (emptyFieldIndex >= 0) {
             field.getField().put(emptyFieldIndex, Sign.NOUGHT);
@@ -43,7 +57,7 @@ public class LogicServlet extends HttpServlet {
             currentSession.setAttribute("draw", true);
             List<Sign> data = field.getFieldData();
             currentSession.setAttribute("data", data);
-            resp.sendRedirect("/index.jsp");
+            resp.sendRedirect("/jsp/index.jsp");
             return;
         }
 
@@ -52,7 +66,7 @@ public class LogicServlet extends HttpServlet {
         currentSession.setAttribute("data", data);
         currentSession.setAttribute("field", field);
 
-        resp.sendRedirect("/index.jsp");
+        resp.sendRedirect("/jsp/index.jsp");
     }
 
     private Field extractField(HttpSession currentSession) {
@@ -62,6 +76,11 @@ public class LogicServlet extends HttpServlet {
             throw new RuntimeException("Session is broken, try one more time");
         }
         return (Field) fieldAttribute;
+    }
+
+    private boolean getThoughtfulStep(HttpSession currentSession) {
+        Object isThoughtfulStepAttribute = currentSession.getAttribute("thoughtful");
+        return (Boolean) isThoughtfulStepAttribute;
     }
 
     private int getSelectedIndex(HttpServletRequest request) {
@@ -79,7 +98,7 @@ public class LogicServlet extends HttpServlet {
 
             currentSession.setAttribute("data", data);
 
-            response.sendRedirect("/index.jsp");
+            response.sendRedirect("/jsp/index.jsp");
             return true;
         }
         return false;

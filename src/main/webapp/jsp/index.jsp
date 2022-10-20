@@ -1,34 +1,39 @@
-<%@ page import="com.tictactoe.Sign" %>
+<%@ page import="com.tictactoe.model.Sign" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="static/main.css" rel="stylesheet">
+    <link href="../static/main.css" rel="stylesheet">
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
     <script src="<c:url value="/static/jquery-3.6.0.min.js"/>"></script>
     <title>Tic-Tac-Toe</title>
 </head>
-<body>
+
 <h1>Tic-Tac-Toe</h1>
 
 <table>
     <tr>
-        <td onclick="window.location='/logic?click=0'">${data.get(0).getSign()}</td>
-        <td onclick="window.location='/logic?click=1'">${data.get(1).getSign()}</td>
-        <td onclick="window.location='/logic?click=2'">${data.get(2).getSign()}</td>
+        <td onclick="window.location='/logic?click=0'"><img src=${data.get(0).getSign()}></td>
+        <td onclick="window.location='/logic?click=1'"><img src=${data.get(1).getSign()}></td>
+        <td onclick="window.location='/logic?click=2'"><img src=${data.get(2).getSign()}></td>
     </tr>
     <tr>
-        <td onclick="window.location='/logic?click=3'">${data.get(3).getSign()}</td>
-        <td onclick="window.location='/logic?click=4'">${data.get(4).getSign()}</td>
-        <td onclick="window.location='/logic?click=5'">${data.get(5).getSign()}</td>
+        <td onclick="window.location='/logic?click=3'"><img src=${data.get(3).getSign()}></td>
+        <td onclick="window.location='/logic?click=4'"><img src=${data.get(4).getSign()}></td>
+        <td onclick="window.location='/logic?click=5'"><img src=${data.get(5).getSign()}></td>
     </tr>
     <tr>
-        <td onclick="window.location='/logic?click=6'">${data.get(6).getSign()}</td>
-        <td onclick="window.location='/logic?click=7'">${data.get(7).getSign()}</td>
-        <td onclick="window.location='/logic?click=8'">${data.get(8).getSign()}</td>
+        <td onclick="window.location='/logic?click=6'"><img src=${data.get(6).getSign()}></td>
+        <td onclick="window.location='/logic?click=7'"><img src=${data.get(7).getSign()}></td>
+        <td onclick="window.location='/logic?click=8'"><img src=${data.get(8).getSign()}></td>
     </tr>
 </table>
+
+<hr>
+
+<h2>Level selected: ${level.getLevel()}</h2>
+<button onclick="window.location='/level'">Change level</button>
 
 <hr>
 <c:set var="CROSSES" value="<%=Sign.CROSS%>"/>

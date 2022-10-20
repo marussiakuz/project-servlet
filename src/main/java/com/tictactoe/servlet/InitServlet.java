@@ -1,4 +1,8 @@
-package com.tictactoe;
+package com.tictactoe.servlet;
+
+import com.tictactoe.model.Field;
+import com.tictactoe.model.Level;
+import com.tictactoe.model.Sign;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +25,19 @@ public class InitServlet extends HttpServlet {
         List<Sign> data = field.getFieldData();
         currentSession.setAttribute("field", field);
         currentSession.setAttribute("data", data);
-        getServletContext().getRequestDispatcher("/index.jsp").forward(req, resp);
+        Level level = getLevel(req);
+        currentSession.setAttribute("level", level == null ? getLevel(req) : level);
+        if (level == Level.MIDDLE) currentSession.setAttribute("thoughtful", true);
+        getServletContext().getRequestDispatcher("/jsp/index.jsp").forward(req, resp);
+    }
+
+    private Level getLevel(HttpServletRequest request) {
+        String level = request.getParameter("level");
+        if (level == null) return Level.LOW;
+        try {
+            return Level.valueOf(level.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Level.LOW;
+        }
     }
 }

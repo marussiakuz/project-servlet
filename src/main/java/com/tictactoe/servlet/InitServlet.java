@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet(name = "InitServlet", value = "/start")
 public class InitServlet extends HttpServlet {
@@ -21,21 +20,32 @@ public class InitServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession currentSession = req.getSession(true);
         Field field = new Field();
-        Map<Integer, Sign> fieldData = field.getField();
         List<Sign> data = field.getFieldData();
+        Level level = getLevel(req);
+
         currentSession.setAttribute("field", field);
         currentSession.setAttribute("data", data);
-        Level level = getLevel(req);
-        currentSession.setAttribute("level", level == null ? getLevel(req) : level);
+        currentSession.setAttribute("level",level);
         if (level == Level.MIDDLE) currentSession.setAttribute("thoughtful", true);
+
         getServletContext().getRequestDispatcher("/jsp/index.jsp").forward(req, resp);
     }
 
     private Level getLevel(HttpServletRequest request) {
+        Object levelAttribute = request.getSession(true).getAttribute("level");
+
+        if (levelAttribute != null) {
+            return getLevel(levelAttribute.toString());
+        }
+
         String level = request.getParameter("level");
         if (level == null) return Level.LOW;
+        return getLevel(level);
+    }
+
+    private Level getLevel(String name) {
         try {
-            return Level.valueOf(level.toUpperCase());
+            return Level.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {
             return Level.LOW;
         }

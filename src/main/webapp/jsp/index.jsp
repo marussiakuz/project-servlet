@@ -56,12 +56,12 @@
 <script>
     function restart() {
         $.ajax({
-            url: '/restart',
+            url: '/restart?level=' + `${level.getLevel()}`,
             type: 'POST',
             contentType: 'application/json;charset=UTF-8',
             async: false,
             success: function () {
-                location.reload();
+                location.assign("/start");
             }
         });
     }

@@ -20,21 +20,18 @@ public class LogicServlet extends HttpServlet implements LevelDeterminable {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession currentSession = req.getSession();
-
         Field field = extractField(currentSession);
-
         int index = getSelectedIndex(req);
 
         Sign currentSign = field.getField().get(index);
-
-        if (Sign.EMPTY != currentSign) {
+        if (Sign.EMPTY != currentSign || currentSession.getAttribute("winner") != null) {
             RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/jsp/index.jsp");
             dispatcher.forward(req, resp);
             return;
         }
 
         field.getField().put(index, Sign.CROSS);
-        if (checkWin(resp, currentSession, field)) {
+        if (checkWin(req, resp, currentSession, field)) {
             return;
         }
 
@@ -50,14 +47,15 @@ public class LogicServlet extends HttpServlet implements LevelDeterminable {
 
         if (emptyFieldIndex >= 0) {
             field.getField().put(emptyFieldIndex, Sign.NOUGHT);
-            if (checkWin(resp, currentSession, field)) {
+            if (checkWin(req, resp, currentSession, field)) {
                 return;
             }
         } else {
             currentSession.setAttribute("draw", true);
             List<Sign> data = field.getFieldData();
             currentSession.setAttribute("data", data);
-            resp.sendRedirect("/jsp/index.jsp");
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/jsp/index.jsp");
+            dispatcher.forward(req, resp);
             return;
         }
 
@@ -66,7 +64,8 @@ public class LogicServlet extends HttpServlet implements LevelDeterminable {
         currentSession.setAttribute("data", data);
         currentSession.setAttribute("field", field);
 
-        resp.sendRedirect("/jsp/index.jsp");
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/jsp/index.jsp");
+        dispatcher.forward(req, resp);
     }
 
     private Field extractField(HttpSession currentSession) {
@@ -89,7 +88,8 @@ public class LogicServlet extends HttpServlet implements LevelDeterminable {
         return isNumeric ? Integer.parseInt(click) : 0;
     }
 
-    private boolean checkWin(HttpServletResponse response, HttpSession currentSession, Field field) throws IOException {
+    private boolean checkWin(HttpServletRequest request, HttpServletResponse response, HttpSession currentSession,
+                             Field field) throws IOException, ServletException {
         Sign winner = field.checkWin();
         if (Sign.CROSS == winner || Sign.NOUGHT == winner) {
             currentSession.setAttribute("winner", winner);
@@ -98,7 +98,8 @@ public class LogicServlet extends HttpServlet implements LevelDeterminable {
 
             currentSession.setAttribute("data", data);
 
-            response.sendRedirect("/jsp/index.jsp");
+            RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/jsp/index.jsp");
+            dispatcher.forward(request, response);
             return true;
         }
         return false;

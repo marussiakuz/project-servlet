@@ -12,8 +12,14 @@ public class RestartServlet extends HttpServlet implements LevelDeterminable {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String level = req.getParameter("level");
+        String level = getLevel(req);
         req.getSession().invalidate();
         resp.sendRedirect("/start?level=" + level);
+    }
+
+    private String getLevel(HttpServletRequest req) {
+        String level = req.getParameter("level");
+        if (level != null && !level.equals("undefined")) return level;
+        return req.getSession(true).getAttribute("level").toString();
     }
 }
